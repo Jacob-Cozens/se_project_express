@@ -51,6 +51,11 @@ const likeItem = (req, res) =>
     })
     .catch((err) => {
       console.error(err);
+      if ((err.name = "DocumentNotFoundError")) {
+        return res.status(404).send({ message: "Item not found" });
+      } else if ((err.name = "ValidationError")) {
+        return res.status(400).send({ message: err.message });
+      }
       return res.status(500).send({ message: err.message });
     });
 
@@ -65,6 +70,11 @@ const dislikeItem = (req, res) =>
     })
     .catch((err) => {
       console.error(err);
+      if ((err.name = "DocumentNotFoundError")) {
+        return res.status(404).send({ message: "Item not found" });
+      } else if ((err.name = "ValidationError")) {
+        return res.status(400).send({ message: err.message });
+      }
       return res.status(500).send({ message: err.message });
     });
 
