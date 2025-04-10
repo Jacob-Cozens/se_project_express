@@ -40,4 +40,32 @@ const deleteItem = (req, res) => {
     });
 };
 
-module.exports = { createItem, getItems, deleteItem };
+const likeItem = (req, res) =>
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true }
+  )
+    .then((item) => {
+      res.status(200).send(item);
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).send({ message: err.message });
+    });
+
+const dislikeItem = (req, res) =>
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $pull: { likes: req.user._id } },
+    { new: true }
+  )
+    .then((item) => {
+      res.status(200).send(item);
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).send({ message: err.message });
+    });
+
+module.exports = { createItem, getItems, deleteItem, likeItem, dislikeItem };
