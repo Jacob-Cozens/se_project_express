@@ -1,10 +1,18 @@
 const ClothingItem = require("../models/clothingitem");
 
+const getItems = (req, res) => {
+  ClothingItem.find({})
+    .then((item) => res.status(200).send(item))
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).send({ message: err.message });
+    });
+};
+
 const createItem = (req, res) => {
-  console.log(req.user._id);
   const { name, weather, imageUrl } = req.body;
 
-  ClothingItem.create({ name, weather, imageUrl })
+  ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((item) => res.status(201).send(item))
     .catch((err) => {
       console.error(err);
@@ -15,4 +23,10 @@ const createItem = (req, res) => {
     });
 };
 
-module.exports = { createItem };
+const deleteItem = (req, res) => {
+  const { itemId } = req.params;
+  ClothingItem.findById(itemId)
+  .orFail()
+}
+
+module.exports = { createItem, getItems, deleteItem };
