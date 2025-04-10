@@ -26,7 +26,18 @@ const createItem = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
   ClothingItem.findById(itemId)
-  .orFail()
-}
+    .orFail()
+    .then((item) => {
+      return item.deleteOne();
+    })
+    .then(() => res.status(200).send({ message: "Item deleted succesfully" }))
+    .catch((err) => {
+      console.error(err);
+      if ((err.name = "DocumentNotFoundError")) {
+        return res.status(404).send({ message: "Item not found" });
+      }
+      return res.status(500).send({ message: err.message });
+    });
+};
 
 module.exports = { createItem, getItems, deleteItem };
