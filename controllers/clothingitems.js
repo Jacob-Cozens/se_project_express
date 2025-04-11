@@ -33,8 +33,10 @@ const deleteItem = (req, res) => {
     .then(() => res.status(200).send({ message: "Item deleted succesfully" }))
     .catch((err) => {
       console.error(err);
-      if ((err.name === "DocumentNotFoundError")) {
-        return res.status(404).send({ message: "Item not found" });
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: err.message });
+      } else if (err.name === "DocumentNotFoundError") {
+        return res.status(404).send({ message: err.message });
       }
       return res.status(500).send({ message: err.message });
     });
@@ -52,7 +54,9 @@ const likeItem = (req, res) =>
     })
     .catch((err) => {
       console.error(err);
-      if ((err.name === "DocumentNotFoundError")) {
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: err.message });
+      } else if (err.name === "DocumentNotFoundError") {
         return res.status(404).send({ message: err.message });
       }
       return res.status(500).send({ message: err.message });
@@ -70,7 +74,9 @@ const dislikeItem = (req, res) =>
     })
     .catch((err) => {
       console.error(err);
-      if ((err.name === "DocumentNotFoundError")) {
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: err.message });
+      } else if (err.name === "DocumentNotFoundError") {
         return res.status(404).send({ message: err.message });
       }
       return res.status(500).send({ message: err.message });
