@@ -1,5 +1,11 @@
+const clothingitem = require("../models/clothingitem");
 const ClothingItem = require("../models/clothingitem");
-const { BAD_REQUEST, NOT_FOUND, DEFAULT } = require("../utils/errors");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  DEFAULT,
+  FORBIDDEN,
+} = require("../utils/errors");
 
 const getItems = (req, res) => {
   ClothingItem.find({})
@@ -32,7 +38,12 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
   ClothingItem.findById(itemId)
     .orFail()
-    .then((item) => item.deleteOne())
+    .then((item) => {
+      if (item.owner.toString() !== userId) {
+        return res.status(FORBIDDEN).send({ message: err.message });
+      }
+      return ClothingItem.findByIdAndDelete(itemId);
+    })
     .then(() => res.status(200).send({ message: "Item deleted succesfully" }))
     .catch((err) => {
       console.error(err);
@@ -89,7 +100,9 @@ const dislikeItem = (req, res) =>
       if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).send({ message: err.message });
       }
-      return res.status(DEFAULT).send({ message: "An error has occured on the server." });
+      return res
+        .status(DEFAULT)
+        .send({ message: "An error has occured on the server." });
     });
 
 module.exports = { createItem, getItems, deleteItem, likeItem, dislikeItem };
