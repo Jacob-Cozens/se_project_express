@@ -23,32 +23,40 @@ const getUsers = (req, res) => {
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
-  User.findOne({ email }).then((existingUser) => {
-    if (existingUser) {
-      return res
-        .status(CONFLICT_ERROR)
-        .send({ message: "Email is already in use" });
-    }
-  });
-  return bcrypt
-    .hash(password, 10)
-    .then((hash) => User.create({ name, avatar, email, password: hash }))
-    .then((user) =>
-      res.status(201).send({
-        name: user.name,
-        avatar: user.avatar,
-        email: user.email,
+  const createUser = (req, res) => {
+    const { name, avatar, email, password } = req.body;
+
+    User.findOne({ email })
+      .then((existingUser) => {
+        if (existingUser) {
+          return res
+            .status(CONFLICT_ERROR)
+            .send({ message: "Email is already in use" });
+        }
+
+        return bcrypt.hash(password, 10).then((hash) => {
+          return User.create({ name, avatar, email, password: hash });
+        });
       })
-    )
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
-      }
-      return res
-        .status(DEFAULT)
-        .send({ message: "An error has occured on the server." });
-    });
+      .then((user) => {
+        if (user) {
+          return res.status(201).send({
+            name: user.name,
+            avatar: user.avatar,
+            email: user.email,
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (err.name === "ValidationError") {
+          return res.status(BAD_REQUEST).send({ message: err.message });
+        }
+        return res
+          .status(DEFAULT)
+          .send({ message: "An error has occurred on the server." });
+      });
+  };
 };
 
 const loginUser = (req, res) => {
@@ -96,7 +104,7 @@ const updateUser = (req, res) => {
   const userId = req.user._id;
   const { name, avatar } = req.body;
 
-  userFindByIdAndUpdate(
+  User.FindByIdAndUpdate(
     userId,
     { name, avatar },
     { new: true, runValidators: true }
