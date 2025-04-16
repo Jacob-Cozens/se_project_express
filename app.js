@@ -11,6 +11,7 @@ mongoose
     console.log("Connected to DB");
   })
   .catch(console.error);
+  
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -20,6 +21,8 @@ app.use((req, res, next) => {
   next();
 });
 app.use("/", mainRouter);
+
+
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
