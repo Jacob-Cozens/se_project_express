@@ -5,7 +5,9 @@ module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
-    return res.status(BAD_REQUEST).send({ message: err.message });
+    return res
+      .status(BAD_REQUEST)
+      .send({ message: "Information entered is incorrect" });
   }
 
   const token = authorization.replace("Bearer ", "");
@@ -19,5 +21,5 @@ module.exports = (req, res, next) => {
 
   req.user = payload;
 
-  next();
+  return next();
 };
