@@ -1,4 +1,3 @@
-const clothingitem = require("../models/clothingitem");
 const ClothingItem = require("../models/clothingitem");
 const {
   BAD_REQUEST,
@@ -35,12 +34,14 @@ const createItem = (req, res) => {
 };
 
 const deleteItem = (req, res) => {
-  const { itemId } = req.params;
+  const { itemId, userId } = req.params;
   ClothingItem.findById(itemId)
     .orFail()
     .then((item) => {
       if (item.owner.toString() !== userId) {
-        return res.status(FORBIDDEN).send({ message: err.message });
+        return res
+          .status(FORBIDDEN)
+          .send({ message: "You don't have permission to delete this" });
       }
       return ClothingItem.findByIdAndDelete(itemId);
     })

@@ -25,13 +25,21 @@ const createUser = (req, res) => {
 
   User.findOne({ email }).then((existingUser) => {
     if (existingUser) {
-      return res.status(CONFLICT_ERROR).send({ message: err.message });
+      return res
+        .status(CONFLICT_ERROR)
+        .send({ message: "Email is already in use" });
     }
   });
   return bcrypt
     .hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
-    .then((user) => res.status(201).send(user))
+    .then((user) =>
+      res.status(201).send({
+        name: user.name,
+        avatar: user.avatar,
+        email: user.email,
+      })
+    )
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
