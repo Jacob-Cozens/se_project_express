@@ -44,9 +44,10 @@ const createUser = (req, res) => {
 };
 
 const loginUser = (req, res) => {
-  const { email, password } = req.body;
+  const { email } = req.body;
 
-  return User.findUserByCredentials(email, password)
+  return User.findOne({ email })
+    .select("+password")
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
@@ -108,4 +109,10 @@ const updateUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getCurrentUser, loginUser, updateUser };
+module.exports = {
+  getUsers,
+  createUser,
+  getCurrentUser,
+  loginUser,
+  updateUser,
+};
