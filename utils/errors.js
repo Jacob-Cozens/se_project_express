@@ -4,4 +4,11 @@ const DEFAULT = 500;
 const CONFLICT_ERROR = 409;
 const FORBIDDEN = 403;
 
-module.exports = { BAD_REQUEST, NOT_FOUND, DEFAULT, CONFLICT_ERROR, FORBIDDEN };
+class DuplicateError extends Error {
+  constructor(message) {
+      super(message);
+      this.name = "DuplicateError"; // Custom name for the error
+  }
+}
+
+module.exports = { BAD_REQUEST, NOT_FOUND, DEFAULT, CONFLICT_ERROR, FORBIDDEN, DuplicateError };

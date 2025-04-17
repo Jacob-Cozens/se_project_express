@@ -6,6 +6,7 @@ const {
   NOT_FOUND,
   DEFAULT,
   CONFLICT_ERROR,
+  DuplicateError,
   JWT_SECRET,
 } = require("../utils/errors");
 
@@ -21,16 +22,12 @@ const getUsers = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  console.log("incoming request body:", req.body);
-
   const { name, avatar, email, password } = req.body;
 
   User.findOne({ email })
     .then((existingUser) => {
       if (existingUser) {
-        return res
-          .status(CONFLICT_ERROR)
-          .send({ message: "Email is already in use" });
+        throw new DuplicateError("Email is already in use");
       }
 
       return bcrypt
@@ -49,6 +46,9 @@ const createUser = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
+      if (err instanceof DuplicateError) {
+        return res.status(CONFLICT_ERROR).send({ message: err.message });
+      }
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
@@ -74,6 +74,7 @@ const loginUser = (req, res) => {
       if (err.name === "ValidationError") {
         return res.status(NOT_FOUND).send({ message: err.message });
       }
+
       return res
         .status(DEFAULT)
         .send({ message: "An error has occured on the server " });
