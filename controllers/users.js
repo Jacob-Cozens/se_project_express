@@ -31,9 +31,9 @@ const createUser = (req, res) => {
           .send({ message: "Email is already in use" });
       }
 
-      return bcrypt.hash(password, 10).then((hash) => {
-        return User.create({ name, avatar, email, password: hash });
-      });
+      return bcrypt
+        .hash(password, 10)
+        .then((hash) => User.create({ name, avatar, email, password: hash }));
     })
     .then((user) => {
       if (user) {
@@ -43,6 +43,7 @@ const createUser = (req, res) => {
           email: user.email,
         });
       }
+      return res.status(BAD_REQUEST).send({ message: "User creation failed" });
     })
     .catch((err) => {
       console.error(err);
