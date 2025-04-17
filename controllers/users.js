@@ -21,6 +21,8 @@ const getUsers = (req, res) => {
 };
 
 const createUser = (req, res) => {
+  console.log("incoming request body:", req.body);
+
   const { name, avatar, email, password } = req.body;
 
   User.findOne({ email })
