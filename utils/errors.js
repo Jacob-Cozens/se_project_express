@@ -7,16 +7,25 @@ const FORBIDDEN = 403;
 
 class DuplicateError extends Error {
   constructor(message) {
-      super(message);
-      this.name = "DuplicateError";
+    super(message);
+    this.name = "DuplicateError";
   }
 }
 
 class ForbiddenError extends Error {
   constructor(message) {
-      super(message);
-      this.name = "ForbiddenError";
+    super(message);
+    this.name = "ForbiddenError";
   }
 }
 
-module.exports = { BAD_REQUEST, NOT_FOUND, DEFAULT, CONFLICT_ERROR, FORBIDDEN, UNAUTHORIZED, DuplicateError, ForbiddenError };
+module.exports = {
+  BAD_REQUEST,
+  NOT_FOUND,
+  DEFAULT,
+  CONFLICT_ERROR,
+  FORBIDDEN,
+  UNAUTHORIZED,
+  DuplicateError,
+  ForbiddenError,
+};

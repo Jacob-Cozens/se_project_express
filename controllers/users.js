@@ -83,8 +83,12 @@ const loginUser = (req, res) => {
 
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
-  User.findById(userId) 
-    .then((user) => res.status(200).send(user))
+  User.findById(userId)
+    .orFail()
+    .then((user) => {
+      res.status(200).send(user);
+      console.log(user);
+    })
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
