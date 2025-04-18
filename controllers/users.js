@@ -6,6 +6,7 @@ const {
   NOT_FOUND,
   DEFAULT,
   CONFLICT_ERROR,
+  UNAUTHORIZED,
   DuplicateError,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
@@ -59,10 +60,9 @@ const createUser = (req, res) => {
 };
 
 const loginUser = (req, res) => {
-  const { email } = req.body;
+  const { email, password } = req.body;
 
-  return User.findOne({ email })
-    .select("+password")
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
@@ -71,8 +71,8 @@ const loginUser = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      if (err.name === "ValidationError") {
-        return res.status(NOT_FOUND).send({ message: err.message });
+      if (err.name === "AuthenticationError") {
+        return res.status(UNAUTHORIZED).send({ message: err.message });
       }
 
       return res
@@ -83,8 +83,7 @@ const loginUser = (req, res) => {
 
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
-  User.findById(userId)
-    .orFail()
+  User.findById(userId) 
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
@@ -104,12 +103,12 @@ const updateUser = (req, res) => {
   const userId = req.user._id;
   const { name, avatar } = req.body;
 
-  User.FindByIdAndUpdate(
+  User.findByIdAndUpdate(
     userId,
     { name, avatar },
     { new: true, runValidators: true }
   )
-    .orFail()
+
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);

@@ -4,6 +4,7 @@ const {
   NOT_FOUND,
   DEFAULT,
   FORBIDDEN,
+  ForbiddenError,
 } = require("../utils/errors");
 
 const getItems = (req, res) => {
@@ -34,20 +35,23 @@ const createItem = (req, res) => {
 };
 
 const deleteItem = (req, res) => {
-  const { itemId, userId } = req.params;
+  const { itemId } = req.params;
+  const userId = req.user._id;
   ClothingItem.findById(itemId)
     .orFail()
     .then((item) => {
       if (item.owner.toString() !== userId) {
-        return res
-          .status(FORBIDDEN)
-          .send({ message: "You don't have permission to delete this" });
+        throw new ForbiddenError("You don't have permission to delete this");
       }
-      return ClothingItem.findByIdAndDelete(itemId);
+      return ClothingItem.findByIdAndDelete(itemId).then(() =>
+        res.status(200).send({ message: "Item deleted succesfully" })
+      );
     })
-    .then(() => res.status(200).send({ message: "Item deleted succesfully" }))
     .catch((err) => {
       console.error(err);
+      if (err instanceof ForbiddenError) {
+        return res.status(FORBIDDEN).send({ message: err.message });
+      }
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
