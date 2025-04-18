@@ -62,6 +62,9 @@ const createUser = (req, res) => {
 const loginUser = (req, res) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res.status(BAD_REQUEST).send({ message: err.message });
+  }
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
@@ -74,7 +77,6 @@ const loginUser = (req, res) => {
       if (err.name === "AuthenticationError") {
         return res.status(UNAUTHORIZED).send({ message: err.message });
       }
-
       return res
         .status(DEFAULT)
         .send({ message: "An error has occured on the server " });
