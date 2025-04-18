@@ -76,7 +76,10 @@ const loginUser = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      if (err.name === "AuthenticationError") {
+      if (
+        err.name === "AuthenticationError" ||
+        err.message === "Incorrect email or password"
+      ) {
         return res.status(UNAUTHORIZED).send({ message: err.message });
       }
       if (err.name === "ValidationError") {
