@@ -63,7 +63,9 @@ const loginUser = (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(BAD_REQUEST).send({ message: err.message });
+    return res
+      .status(BAD_REQUEST)
+      .send({ message: "Email and password required" });
   }
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -76,6 +78,9 @@ const loginUser = (req, res) => {
       console.error(err);
       if (err.name === "AuthenticationError") {
         return res.status(UNAUTHORIZED).send({ message: err.message });
+      }
+      if (err.name === "ValidationError") {
+        return res.status(BAD_REQUEST).send({ message: err.message });
       }
       return res
         .status(DEFAULT)
