@@ -4,8 +4,8 @@ const {
   NOT_FOUND,
   DEFAULT,
   FORBIDDEN,
-  ForbiddenError,
 } = require("../utils/errors");
+const { ForbiddenError } = require("../utils/specialerrors/ForbiddenError");
 
 const getItems = (req, res) => {
   ClothingItem.find({})

@@ -7,8 +7,8 @@ const {
   DEFAULT,
   CONFLICT_ERROR,
   UNAUTHORIZED,
-  DuplicateError,
 } = require("../utils/errors");
+const { DuplicateError } = require("../utils/specialerrors/DuplicateError");
 const { JWT_SECRET } = require("../utils/config");
 
 const getUsers = (req, res) => {
