@@ -7,8 +7,8 @@ const {
   DEFAULT,
   CONFLICT_ERROR,
   DuplicateError,
-  JWT_SECRET,
 } = require("../utils/errors");
+const { JWT_SECRET } = require("../utils/config");
 
 const getUsers = (req, res) => {
   User.find({})
@@ -82,7 +82,7 @@ const loginUser = (req, res) => {
 };
 
 const getCurrentUser = (req, res) => {
-  const { userId } = req.user;
+  const userId = req.user._id;
   User.findById(userId)
     .orFail()
     .then((user) => res.status(200).send(user))
