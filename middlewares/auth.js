@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { BAD_REQUEST } = require("../utils/errors");
+const { BAD_REQUEST, UNAUTHORIZED } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
 module.exports = (req, res, next) => {
@@ -7,7 +7,7 @@ module.exports = (req, res, next) => {
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
     return res
-      .status(BAD_REQUEST)
+      .status(UNAUTHORIZED)
       .send({ message: "Information entered is incorrect" });
   }
 
@@ -17,7 +17,7 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    return res.status(BAD_REQUEST).send({ message: err.message });
+    return res.status(UNAUTHORIZED).send({ message: err.message });
   }
 
   req.user = payload;
