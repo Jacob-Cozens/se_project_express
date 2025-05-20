@@ -5,7 +5,9 @@ const {
   DEFAULT,
   FORBIDDEN,
 } = require("../utils/errors");
-const { ForbiddenError } = require("../utils/specialerrors/ForbiddenError");
+const { ForbiddenError } = require("../utils/errors/ForbiddenError");
+const { BadRequestError } = require("../utils/errors/BadRequestError");
+const { NotFoundError } = require("../utils/errors/NotFoundError");
 
 const getItems = (req, res) => {
   ClothingItem.find({})
@@ -26,6 +28,7 @@ const createItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
+        next(new BadRequestError("The information you entered is invalid"));
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
       return res
@@ -53,9 +56,11 @@ const deleteItem = (req, res) => {
         return res.status(FORBIDDEN).send({ message: err.message });
       }
       if (err.name === "CastError") {
+        next(new BadRequestError("The id string is in an invalid format"));
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
       if (err.name === "DocumentNotFoundError") {
+        next(new NotFoundError("The item you've requested cannot be found"));
         return res.status(NOT_FOUND).send({ message: err.message });
       }
       return res
@@ -77,9 +82,11 @@ const likeItem = (req, res) =>
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
+        new (BadRequestError("You cannot like this item"))();
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
       if (err.name === "DocumentNotFoundError") {
+        new (NotFoundError("The item you attempted to like cannot be found"))();
         return res.status(NOT_FOUND).send({ message: err.message });
       }
       return res
@@ -100,9 +107,13 @@ const dislikeItem = (req, res) =>
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
+        new (BadRequestError("You cannot like this item"))();
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
       if (err.name === "DocumentNotFoundError") {
+        new (NotFoundError(
+          "The item you attempted to dislike cannot be found"
+        ))();
         return res.status(NOT_FOUND).send({ message: err.message });
       }
       return res
