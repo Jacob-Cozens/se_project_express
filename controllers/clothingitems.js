@@ -1,26 +1,19 @@
 const ClothingItem = require("../models/clothingitem");
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT,
-  FORBIDDEN,
-} = require("../utils/errors");
+
 const { ForbiddenError } = require("../utils/errors/ForbiddenError");
 const { BadRequestError } = require("../utils/errors/BadRequestError");
 const { NotFoundError } = require("../utils/errors/NotFoundError");
 
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   ClothingItem.find({})
     .then((item) => res.status(200).send(item))
     .catch((err) => {
       console.error(err);
-      return res
-        .status(DEFAULT)
-        .send({ message: "An error has occured on the server." });
+      next(err);
     });
 };
 
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
 
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
@@ -29,15 +22,13 @@ const createItem = (req, res) => {
       console.error(err);
       if (err.name === "ValidationError") {
         next(new BadRequestError("The information you entered is invalid"));
-        return res.status(BAD_REQUEST).send({ message: err.message });
+      } else {
+        next(err);
       }
-      return res
-        .status(DEFAULT)
-        .send({ message: "An error has occured on the server." });
     });
 };
 
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
   const userId = req.user._id;
   ClothingItem.findById(itemId)
@@ -53,23 +44,20 @@ const deleteItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err instanceof ForbiddenError) {
-        return res.status(FORBIDDEN).send({ message: err.message });
+        next(new ForbiddenError("You are not authorized to delete this item"));
       }
       if (err.name === "CastError") {
         next(new BadRequestError("The id string is in an invalid format"));
-        return res.status(BAD_REQUEST).send({ message: err.message });
       }
       if (err.name === "DocumentNotFoundError") {
         next(new NotFoundError("The item you've requested cannot be found"));
-        return res.status(NOT_FOUND).send({ message: err.message });
+      } else {
+        next(err);
       }
-      return res
-        .status(DEFAULT)
-        .send({ message: "An error has occured on the server." });
     });
 };
 
-const likeItem = (req, res) =>
+const likeItem = (req, res, next) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
@@ -82,19 +70,18 @@ const likeItem = (req, res) =>
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        new (BadRequestError("You cannot like this item"))();
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        next(new BadRequestError("You cannot like this item"))();
       }
       if (err.name === "DocumentNotFoundError") {
-        new (NotFoundError("The item you attempted to like cannot be found"))();
-        return res.status(NOT_FOUND).send({ message: err.message });
+        next(
+          new NotFoundError("The item you attempted to like cannot be found")
+        )();
+      } else {
+        next(err);
       }
-      return res
-        .status(DEFAULT)
-        .send({ message: "An error has occured on the server." });
     });
 
-const dislikeItem = (req, res) =>
+const dislikeItem = (req, res, next) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } },
@@ -107,18 +94,15 @@ const dislikeItem = (req, res) =>
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        new (BadRequestError("You cannot like this item"))();
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        next(new BadRequestError("You cannot like this item"))();
       }
       if (err.name === "DocumentNotFoundError") {
-        new (NotFoundError(
-          "The item you attempted to dislike cannot be found"
-        ))();
-        return res.status(NOT_FOUND).send({ message: err.message });
+        next(
+          new NotFoundError("The item you attempted to dislike cannot be found")
+        )();
+      } else {
+        next(err);
       }
-      return res
-        .status(DEFAULT)
-        .send({ message: "An error has occured on the server." });
     });
 
 module.exports = { createItem, getItems, deleteItem, likeItem, dislikeItem };
