@@ -12,6 +12,7 @@ const {
   validateUserLogin,
   validateUserBody,
 } = require("../middlewares/validation");
+const { NotFoundError } = require("../utils/errors/NotFoundError");
 
 app.get("/crash-test", () => {
   setTimeout(() => {
@@ -24,8 +25,6 @@ router.post("/signup", validateUserBody, createUser);
 
 router.use("/users", auth, userRouter);
 router.use("/items", clothingItemRouter);
-router.use((req, res) =>
-  res.status(NOT_FOUND).send({ message: "Route not found." })
-);
+router.use((req, res) => next(new NotFoundError("Route not found")));
 
 module.exports = router;
